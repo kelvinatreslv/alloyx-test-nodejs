@@ -10,27 +10,27 @@ env:
 phases:
   pre_build:
     commands:
-      - echo "Logging in to Amazon ECR..."
+      - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
       - aws ecr describe-repositories --repository-names
-      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-      - echo "Commit hash: $COMMIT_HASH"
-      - IMAGE_TAG=${COMMIT_HASH:-latest}
-      - FULL_IMAGE_URI="$ECR_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG"
-      - echo "Image will be tagged as: $FULL_IMAGE_URI"
-  build:
-    commands:
-      - echo "Building Docker image..."
-      - docker build -t $REPOSITORY_NAME .
-      - docker tag $REPOSITORY_NAME $FULL_IMAGE_URI
-  post_build:
-    commands:
-      - echo "Pushing Docker image to ECR..."
-      - docker push $FULL_IMAGE_URI
-      - echo "Writing image definitions file..."
-      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $FULL_IMAGE_URI > imagedefinitions.json
-      - echo "Build completed on $(date)"
+      # - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      # - echo "Commit hash: $COMMIT_HASH"
+      # - IMAGE_TAG=${COMMIT_HASH:-latest}
+      # - FULL_IMAGE_URI="$ECR_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG"
+      # - echo "Image will be tagged as: $FULL_IMAGE_URI"
+#   build:
+#     commands:
+#       - echo "Building Docker image..."
+#       - docker build -t $REPOSITORY_NAME .
+#       - docker tag $REPOSITORY_NAME $FULL_IMAGE_URI
+#   post_build:
+#     commands:
+#       - echo "Pushing Docker image to ECR..."
+#       - docker push $FULL_IMAGE_URI
+#       - echo "Writing image definitions file..."
+#       - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $FULL_IMAGE_URI > imagedefinitions.json
+#       - echo "Build completed on $(date)"
 
-artifacts:
-  files:
-    - imagedefinitions.json
+# artifacts:
+#   files:
+#     - imagedefinitions.json
