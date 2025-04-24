@@ -3,32 +3,32 @@ version: 0.2
 env:
   variables:
     AWS_DEFAULT_REGION: "ap-east-1"
-    REPOSITORY_URI: "318098414972.dkr.ecr.ap-east-1.amazonaws.com/testing"
+    ECR_REGISTRY: "318098414972.dkr.ecr.ap-east-1.amazonaws.com"
+    REPOSITORY_NAME: "testing/nodejs"
     IMAGE_TAG: "latest"
-    CONTAINER_NAME: "nodejs"
+    CONTAINER_NAME: "nodejs-app"
 
 phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password | docker login --username AWS --password-stdin $REPOSITORY_URI
-      - echo Checking for existing repository...
-      - aws ecr describe-repositories --repository-names ${CONTAINER_NAME} || aws ecr create-repository --repository-name ${CONTAINER_NAME}
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
+      - FULL_IMAGE_URI="$ECR_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG"
+      - echo "Image will be tagged as: $FULL_IMAGE_URI"
   build:
     commands:
       - echo Building Docker image...
-      - docker build -t $CONTAINER_NAME .
-      - docker tag $CONTAINER_NAME:latest $REPOSITORY_URI:$IMAGE_TAG
-      - docker tag $CONTAINER_NAME:latest $REPOSITORY_URI:latest
+      - docker build -t $REPOSITORY_NAME .
+      - docker tag $REPOSITORY_NAME:latest $FULL_IMAGE_URI
   post_build:
     commands:
-      - echo Pushing Docker images to ECR...
-      - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - docker push $REPOSITORY_URI:latest
+      - echo Pushing Docker image to ECR...
+      - docker push $FULL_IMAGE_URI
       - echo Writing image definitions file...
-      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $FULL_IMAGE_URI > imagedefinitions.json
+      - echo Build completed on `date`
 
 artifacts:
   files:
