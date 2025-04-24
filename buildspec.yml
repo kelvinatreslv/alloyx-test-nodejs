@@ -3,9 +3,9 @@ version: 0.2
 env:
   variables:
     AWS_DEFAULT_REGION: "ap-east-1"
-    REPOSITORY_URI: "318098414972.dkr.ecr.ap-east-1.amazonaws.com/testing/nodejs"
+    REPOSITORY_URI: "318098414972.dkr.ecr.ap-east-1.amazonaws.com/testing"
     IMAGE_TAG: "latest"
-    CONTAINER_NAME: "test-nodejs-app"
+    CONTAINER_NAME: "nodejs"
 
 phases:
   pre_build:
