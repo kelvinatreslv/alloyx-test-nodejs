@@ -1,16 +1,16 @@
 {
-    "name": "nodejs-codebuild-s3-example",
-    "version": "1.0.0",
-    "description": "Node.js project with AWS CodeBuild and S3 integration",
-    "main": "app.js",
-    "scripts": {
-      "start": "node app.js",
-      "test": "jest"
-    },
-    "dependencies": {
-      "express": "^4.18.2"
-    },
-    "devDependencies": {
-      "jest": "^29.7.0"
-    }
+  "name": "alloyx-test-nodejs",
+  "version": "1.0.0",
+  "description": "Node.js project with AWS CI/CD pipeline",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
+}
