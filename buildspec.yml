@@ -18,19 +18,21 @@ phases:
       # - IMAGE_TAG=${COMMIT_HASH:-latest}
       # - FULL_IMAGE_URI="$ECR_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG"
       # - echo "Image will be tagged as: $FULL_IMAGE_URI"
-#   build:
-#     commands:
-#       - echo "Building Docker image..."
-#       - docker build -t $REPOSITORY_NAME .
-#       - docker tag $REPOSITORY_NAME $FULL_IMAGE_URI
-#   post_build:
-#     commands:
-#       - echo "Pushing Docker image to ECR..."
-#       - docker push $FULL_IMAGE_URI
-#       - echo "Writing image definitions file..."
-#       - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $FULL_IMAGE_URI > imagedefinitions.json
-#       - echo "Build completed on $(date)"
+  build:
+    commands:
+      - echo "Building Docker image..."
+      - docker build -t $REPOSITORY_NAME .
+      - docker tag testing/nodejs:latest 318098414972.dkr.ecr.ap-east-1.amazonaws.com/testing/nodejs:latest
+      # - docker tag $REPOSITORY_NAME $FULL_IMAGE_URI
+  post_build:
+    commands:
+      - echo "Pushing Docker image to ECR..."
+      # - docker push $FULL_IMAGE_URI
+      - docker push 318098414972.dkr.ecr.ap-east-1.amazonaws.com/testing/nodejs:latest
+      - echo "Writing image definitions file..."
+      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $FULL_IMAGE_URI > imagedefinitions.json
+      - echo "Build completed on $(date)"
 
-# artifacts:
-#   files:
-#     - imagedefinitions.json
+artifacts:
+  files:
+    - imagedefinitions.json
