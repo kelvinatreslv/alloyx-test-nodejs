@@ -32,9 +32,9 @@ phases:
     commands:
       - echo "Pushing Docker image to ECR..."
       # - docker push $FULL_IMAGE_URI
-      - docker push $IMAGE_NAME --all-tags
+      - docker push $ECR_REPO_URI --all-tags
       - echo "Writing image definitions file..."
-      # - printf '[{"name":"%s","imageUri":"%s"}]' $IMAGE_NAME $FULL_IMAGE_URI > imagedefinitions.json
+      # - printf '[{"name":"%s","imageUri":"%s"}]' $ECR_REPO_URI $FULL_IMAGE_URI > imagedefinitions.json
       - echo "Build completed on $(date)"
 
 artifacts:
