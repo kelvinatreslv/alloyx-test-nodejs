@@ -3,32 +3,35 @@ version: 0.2
 env:
   variables:
     AWS_DEFAULT_REGION: "ap-east-1"
-    ECR_REGISTRY: "318098414972.dkr.ecr.ap-east-1.amazonaws.com"
-    REPOSITORY_NAME: "testing/nodejs"
-    CONTAINER_NAME: "nodejs-app"
+    ECR_REPO_URI: "318098414972.dkr.ecr.ap-east-1.amazonaws.com/testing/nodejs"
+    IMAGE_NAME: "testing/nodejs"
+    # REPOSITORY_NAME: "testing/nodejs"
+    # CONTAINER_NAME: "nodejs-app"
 
 phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
-      - aws ecr describe-repositories --repository-names testing/nodejs
-      # - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-      # - echo "Commit hash: $COMMIT_HASH"
-      # - IMAGE_TAG=${COMMIT_HASH:-latest}
-      # - FULL_IMAGE_URI="$ECR_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG"
-      # - echo "Image will be tagged as: $FULL_IMAGE_URI"
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPO_URI
+      - aws ecr describe-repositories --repository-names $IMAGE_NAME
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - echo 'Commit hash:' $COMMIT_HASH"
+      - IMAGE_TAG=${COMMIT_HASH}
+      - FULL_IMAGE_URI="$ECR_REPO_URI/$REPOSITORY_NAME:$IMAGE_TAG"
+      - echo 'Image will be tagged as:' $FULL_IMAGE_URI
   build:
     commands:
       - echo "Building Docker image..."
-      - docker build -t $REPOSITORY_NAME .
-      - docker tag testing/nodejs:latest 318098414972.dkr.ecr.ap-east-1.amazonaws.com/testing/nodejs:latest
-      # - docker tag $REPOSITORY_NAME $FULL_IMAGE_URI
+      - docker build -t $ECR_REPO_URI .
+      # - docker tag testing/nodejs:latest 318098414972.dkr.ecr.ap-east-1.amazonaws.com/testing/nodejs:latest
+      # - docker tag testing/nodejs:latest $FULL_IMAGE_URI
+      - docker tag $ECR_REPO_URI $FULL_IMAGE_URI
+      - docker image ls
   post_build:
     commands:
       - echo "Pushing Docker image to ECR..."
       # - docker push $FULL_IMAGE_URI
-      - docker push 318098414972.dkr.ecr.ap-east-1.amazonaws.com/testing/nodejs:latest
+      - docker push $$ECR_REPO_URI --all-tags
       - echo "Writing image definitions file..."
       - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $FULL_IMAGE_URI > imagedefinitions.json
       - echo "Build completed on $(date)"
