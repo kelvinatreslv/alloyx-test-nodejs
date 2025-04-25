@@ -15,25 +15,26 @@ phases:
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPO_URI
       - aws ecr describe-repositories --repository-names $IMAGE_NAME
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-      - echo 'Commit hash:' $COMMIT_HASH"
+      - echo 'Commit hash:' $COMMIT_HASH
       - IMAGE_TAG=${COMMIT_HASH}
-      - FULL_IMAGE_URI="$ECR_REPO_URI/$REPOSITORY_NAME:$IMAGE_TAG"
+      - FULL_IMAGE_URI="$ECR_REPO_URI:$IMAGE_TAG"
       - echo 'Image will be tagged as:' $FULL_IMAGE_URI
   build:
     commands:
       - echo "Building Docker image..."
-      - docker build -t $ECR_REPO_URI .
+      - docker build -t $IMAGE_NAME .
       # - docker tag testing/nodejs:latest 318098414972.dkr.ecr.ap-east-1.amazonaws.com/testing/nodejs:latest
       # - docker tag testing/nodejs:latest $FULL_IMAGE_URI
-      - docker tag $ECR_REPO_URI $FULL_IMAGE_URI
+      - docker tag $IMAGE_NAME $FULL_IMAGE_URI
+      - docker tag $IMAGE_NAME $ECR_REPO_URI:latest
       - docker image ls
   post_build:
     commands:
       - echo "Pushing Docker image to ECR..."
       # - docker push $FULL_IMAGE_URI
-      - docker push $$ECR_REPO_URI --all-tags
+      - docker push $IMAGE_NAME --all-tags
       - echo "Writing image definitions file..."
-      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $FULL_IMAGE_URI > imagedefinitions.json
+      # - printf '[{"name":"%s","imageUri":"%s"}]' $IMAGE_NAME $FULL_IMAGE_URI > imagedefinitions.json
       - echo "Build completed on $(date)"
 
 artifacts:
